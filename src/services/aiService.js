@@ -15,13 +15,26 @@ const getAIConfig = () => {
                   import.meta.env.VITE_AI_API_URL?.includes('azure') ||
                   import.meta.env.VITE_AI_API_URL?.includes('openai.azure.com');
   
-  return {
+  const config = {
     apiKey: import.meta.env.VITE_AI_API_KEY || '',
     model: import.meta.env.VITE_AI_MODEL || 'gpt-3.5-turbo',
     apiUrl: import.meta.env.VITE_AI_API_URL || 'https://api.openai.com/v1/chat/completions',
     isAzure: isAzure,
     apiVersion: import.meta.env.VITE_AI_API_VERSION || '2024-02-15-preview',
   };
+
+  // Debug logging
+  console.log('=== AI Configuration Debug ===');
+  console.log('VITE_AI_PROVIDER:', import.meta.env.VITE_AI_PROVIDER);
+  console.log('VITE_AI_API_URL:', import.meta.env.VITE_AI_API_URL);
+  console.log('VITE_AI_MODEL:', import.meta.env.VITE_AI_MODEL);
+  console.log('API Key exists:', !!config.apiKey);
+  console.log('API Key length:', config.apiKey ? config.apiKey.length : 0);
+  console.log('Is Azure:', isAzure);
+  console.log('Full config:', config);
+  console.log('==============================');
+
+  return config;
 };
 
 /**
