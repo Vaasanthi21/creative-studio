@@ -31,6 +31,7 @@ export default function Settings() {
   const [darkMode, setDarkMode] = useState(true);
   const [showApiKey, setShowApiKey] = useState(false);
   const [logoutConfirm, setLogoutConfirm] = useState(false);
+  const generationsThisMonth = 247; // TODO: Fetch from API
 
   const handleLogout = async () => {
     await signOut();
