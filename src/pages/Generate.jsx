@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useOutletContext } from "react-router-dom";
-import { base44 } from "@/api/base44Client";
+import { generateContent, saveToHistory } from "@/services/aiService";
+import { supabase } from "@/api/supabaseClient";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "@/components/ui/use-toast";
 import { getPersonaById } from "@/lib/personas";
@@ -32,62 +33,52 @@ Tone: ${toneLabel}
 Target length per variant: ${lengthLabel}
 ${params.keywords ? `Keywords to include: ${params.keywords}` : ""}
 
-For each variant, provide a different angle or approach. Make sure the content is professional, engaging, and brand-appropriate.`;
+For each variant, provide a different angle or approach. Make sure the content is professional, engaging, and brand-appropriate.
 
-      console.log('Starting generation with Base44...');
-      console.log('App ID:', base44.config?.appId);
-      console.log('Base URL:', base44.config?.appBaseUrl);
+Respond in JSON format with this exact structure:
+{
+  "variants": [
+    {
+      "title": "Short title for variant 1",
+      "content": "Full content for variant 1",
+      "word_count": 150
+    },
+    {
+      "title": "Short title for variant 2",
+      "content": "Full content for variant 2",
+      "word_count": 180
+    },
+    {
+      "title": "Short title for variant 3",
+      "content": "Full content for variant 3",
+      "word_count": 160
+    }
+  ]
+}`;
+
+      console.log('Starting AI content generation...');
 
       try {
-        const result = await base44.integrations.Core.InvokeLLM({
-          prompt,
-          response_json_schema: {
-            type: "object",
-            properties: {
-              variants: {
-                type: "array",
-                items: {
-                  type: "object",
-                  properties: {
-                    title: { type: "string", description: "Short title for this variant" },
-                    content: { type: "string", description: "The full content" },
-                    word_count: { type: "number", description: "Approximate word count" },
-                  },
-                },
-              },
-            },
-          },
-        });
-
-        console.log('LLM Result:', result);
+        // Generate content using AI service
+        const variants = await generateContent({ prompt });
+        console.log('AI Generation Result:', variants);
 
         // Save to history
-        try {
-          await base44.entities.ContentHistory.create({
-            topic: params.topic,
-            persona: activePersona,
-            persona_label: persona.label,
-            content_type: params.contentType,
-            tone: params.tone,
-            length: params.length,
-            keywords: params.keywords,
-            variants: result.variants,
-            status: "completed",
-          });
-        } catch (historyError) {
-          console.warn('Failed to save to history:', historyError);
-          // Continue anyway - don't fail the generation if history save fails
-        }
+        await saveToHistory({
+          topic: params.topic,
+          persona: activePersona,
+          persona_label: persona.label,
+          content_type: params.contentType,
+          tone: params.tone,
+          length: params.length,
+          keywords: params.keywords,
+          variants: variants,
+          status: "completed",
+        }, supabase);
 
-        return result.variants;
+        return variants;
       } catch (error) {
         console.error('Generation error:', error);
-        console.error('Error details:', {
-          message: error.message,
-          status: error.status,
-          data: error.data,
-          stack: error.stack
-        });
         throw error;
       }
     },
@@ -97,14 +88,20 @@ For each variant, provide a different angle or approach. Make sure the content i
     },
     onError: (error) => {
       console.error('Mutation error:', error);
-      const errorMessage = error.status === 401 || error.status === 403 
-        ? "Authentication required. Please access the app through Base44."
-        : error.message || "Unknown error occurred";
+      let errorMessage = error.message || "Unknown error occurred";
+      
+      // Provide helpful messages based on error type
+      if (error.message?.includes('API key')) {
+        errorMessage = "AI API key not configured. Please add VITE_AI_API_KEY to .env.local. Get a free key at https://openrouter.ai/";
+      } else if (error.message?.includes('network') || error.message?.includes('fetch')) {
+        errorMessage = "Network error. Please check your connection and try again.";
+      }
+      
       toast({ 
         title: "Generation failed", 
         description: errorMessage, 
         variant: "destructive",
-        duration: 5000 
+        duration: 8000 
       });
     },
   });

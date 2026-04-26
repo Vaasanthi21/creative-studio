@@ -1,6 +1,7 @@
 import React, { useState } from "react";
-import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { fetchHistory, deleteHistoryEntry } from "@/services/aiService";
+import { supabase } from "@/api/supabaseClient";
 import { format } from "date-fns";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -22,15 +23,11 @@ export default function History() {
 
   const { data: history = [], isLoading } = useQuery({
     queryKey: ["contentHistory"],
-    queryFn: () => base44.entities.ContentHistory.list("-created_date", 50),
+    queryFn: () => fetchHistory(supabase, 50),
   });
 
   const deleteMutation = useMutation({
-    mutationFn: (id) =>
-      base44.entities.ContentHistory.update(id, {
-        status: "deleted",
-        deleted_at: new Date().toISOString(),
-      }),
+    mutationFn: (id) => deleteHistoryEntry(supabase, id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["contentHistory"] });
       toast({ title: "Entry deleted", duration: 1500 });
