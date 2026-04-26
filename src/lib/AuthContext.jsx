@@ -26,16 +26,16 @@ export const AuthProvider = ({ children }) => {
       // First, check app public settings (with token if available)
       // This will tell us if auth is required, user not registered, etc.
       const appClient = createAxiosClient({
-        baseURL: `/api/apps/public`,
+        baseURL: `${appParams.appBaseUrl || 'https://vashanthi-task-core.base44.app'}/api/apps/public`,
         headers: {
-          'X-App-Id': appParams.appId
+          'X-App-Id': appParams.appId || '69ea3fc78db8825f0359f854'
         },
         token: appParams.token, // Include token if available
         interceptResponses: true
       });
       
       try {
-        const publicSettings = await appClient.get(`/prod/public-settings/by-id/${appParams.appId}`);
+        const publicSettings = await appClient.get(`/public-settings/by-id/${appParams.appId || '69ea3fc78db8825f0359f854'}`);
         setAppPublicSettings(publicSettings);
         
         // If we got the app public settings successfully, check if user is authenticated
@@ -119,8 +119,9 @@ export const AuthProvider = ({ children }) => {
     setIsAuthenticated(false);
     
     if (shouldRedirect) {
-      // Use the SDK's logout method which handles token cleanup and redirect
-      base44.auth.logout(window.location.href);
+      // Redirect to Base44 login page for re-authentication
+      const baseUrl = appParams.appBaseUrl || 'https://vashanthi-task-core.base44.app';
+      window.location.href = `${baseUrl}/login`;
     } else {
       // Just remove the token without redirect
       base44.auth.logout();
