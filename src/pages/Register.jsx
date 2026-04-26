@@ -1,11 +1,11 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Eye, EyeOff, Zap } from "lucide-react";
+import { useNavigate, Link } from "react-router-dom";
+import { useAuth } from "@/lib/AuthContext";
+import { toast } from "@/components/ui/use-toast";
 
 export default function Register() {
+  const navigate = useNavigate();
+  const { signUp } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [form, setForm] = useState({
     full_name: "",
@@ -14,16 +14,48 @@ export default function Register() {
     password: "",
     confirm_password: "",
   });
+  const [isLoading, setIsLoading] = useState(false);
 
-  // TODO: Wire to Neeta's backend — POST /api/auth/register
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    
     if (form.password !== form.confirm_password) {
-      alert("Passwords do not match");
+      toast({ 
+        title: "Passwords do not match", 
+        description: "Please make sure both passwords match",
+        variant: "destructive" 
+      });
       return;
     }
-    console.log("Register payload:", form);
-    alert("Wire to Neeta's POST /api/auth/register");
+
+    if (form.password.length < 8) {
+      toast({ 
+        title: "Password too short", 
+        description: "Password must be at least 8 characters",
+        variant: "destructive" 
+      });
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      await signUp(form.email, form.password, form.full_name);
+      toast({ 
+        title: "Account created!", 
+        description: "You can now sign in to your account",
+        duration: 2000 
+      });
+      navigate('/login');
+    } catch (error) {
+      toast({ 
+        title: "Registration failed", 
+        description: error.message || "Something went wrong",
+        variant: "destructive" 
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -142,18 +174,19 @@ export default function Register() {
 
               <button
                 type="submit"
-                className="w-full py-2 px-4 bg-primary text-white font-medium rounded-md hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background transition-colors"
+                disabled={isLoading}
+                className="w-full py-2 px-4 bg-primary text-white font-medium rounded-md hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-background disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
-                Create Account
+                {isLoading ? "Creating account..." : "Create Account"}
               </button>
             </form>
 
             <div className="text-center pt-2">
               <p className="text-sm text-muted-foreground">
                 Already have an account?{" "}
-                <a href="/login" className="text-primary hover:underline font-medium">
+                <Link to="/login" className="text-primary hover:underline font-medium">
                   Sign in
-                </a>
+                </Link>
               </p>
             </div>
           </div>

@@ -1,10 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "@/lib/AuthContext";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Eye, EyeOff, Zap } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
 
 export default function Login() {
@@ -118,9 +114,9 @@ export default function Login() {
             <div className="text-center pt-2">
               <p className="text-sm text-muted-foreground">
                 Don't have an account?{" "}
-                <a href="/register" className="text-primary hover:underline font-medium">
+                <Link to="/register" className="text-primary hover:underline font-medium">
                   Sign up
-                </a>
+                </Link>
               </p>
             </div>
           </div>
