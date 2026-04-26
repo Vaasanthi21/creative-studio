@@ -1,0 +1,219 @@
+import React, { useState } from "react";
+import { Search, Zap, AlertTriangle, CheckCircle, TrendingUp, Filter } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
+const USAGE_DATA = [
+  { 
+    id: 1, 
+    company: "Uden Tech", 
+    plan: "Pro", 
+    creditsTotal: 1000, 
+    creditsUsed: 847, 
+    creditsRemaining: 153,
+    apiCalls: 2840,
+    lastUsed: "2 hours ago",
+    status: "active" 
+  },
+  { 
+    id: 2, 
+    company: "Pixel Works", 
+    plan: "Pro", 
+    creditsTotal: 1000, 
+    creditsUsed: 720, 
+    creditsRemaining: 280,
+    apiCalls: 2150,
+    lastUsed: "5 hours ago",
+    status: "active" 
+  },
+  { 
+    id: 3, 
+    company: "Brandify Co.", 
+    plan: "Starter", 
+    creditsTotal: 500, 
+    creditsUsed: 485, 
+    creditsRemaining: 15,
+    apiCalls: 1680,
+    lastUsed: "1 day ago",
+    status: "warning" 
+  },
+  { 
+    id: 4, 
+    company: "Nova Labs", 
+    plan: "Trial", 
+    creditsTotal: 100, 
+    creditsUsed: 92, 
+    creditsRemaining: 8,
+    apiCalls: 980,
+    lastUsed: "3 days ago",
+    status: "critical" 
+  },
+  { 
+    id: 5, 
+    company: "MarkNet", 
+    plan: "Trial", 
+    creditsTotal: 100, 
+    creditsUsed: 100, 
+    creditsRemaining: 0,
+    apiCalls: 420,
+    lastUsed: "7 days ago",
+    status: "suspended" 
+  },
+];
+
+const statusConfig = {
+  active: { label: "Healthy", icon: CheckCircle, color: "text-green-400", bg: "bg-green-500/10", border: "border-green-500/20" },
+  warning: { label: "Low Credits", icon: AlertTriangle, color: "text-yellow-400", bg: "bg-yellow-500/10", border: "border-yellow-500/20" },
+  critical: { label: "Critical", icon: AlertTriangle, color: "text-orange-400", bg: "bg-orange-500/10", border: "border-orange-500/20" },
+  suspended: { label: "Exhausted", icon: Zap, color: "text-red-400", bg: "bg-red-500/10", border: "border-red-500/20" },
+};
+
+export default function SuperAdminUsage() {
+  const [search, setSearch] = useState("");
+  const [filter, setFilter] = useState("all");
+
+  const filtered = USAGE_DATA.filter((u) => {
+    const matchesSearch = u.company.toLowerCase().includes(search.toLowerCase());
+    const matchesFilter = filter === "all" || u.status === filter;
+    return matchesSearch && matchesFilter;
+  });
+
+  const totalApiCalls = USAGE_DATA.reduce((sum, u) => sum + u.apiCalls, 0);
+  const avgUsage = Math.round(USAGE_DATA.reduce((sum, u) => sum + (u.creditsUsed / u.creditsTotal) * 100, 0) / USAGE_DATA.length);
+
+  return (
+    <div className="space-y-6 max-w-7xl">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="font-display text-2xl font-bold text-foreground">Usage Monitoring</h1>
+          <p className="text-muted-foreground text-sm">Track API usage and credit consumption</p>
+        </div>
+      </div>
+
+      {/* Summary Stats */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <Card>
+          <CardHeader className="pb-3">
+            <CardDescription>Total API Calls (All Companies)</CardDescription>
+            <CardTitle className="text-2xl">{totalApiCalls.toLocaleString()}</CardTitle>
+          </CardHeader>
+        </Card>
+        <Card>
+          <CardHeader className="pb-3">
+            <CardDescription>Average Credit Usage</CardDescription>
+            <CardTitle className="text-2xl">{avgUsage}%</CardTitle>
+          </CardHeader>
+        </Card>
+        <Card>
+          <CardHeader className="pb-3">
+            <CardDescription>Companies with Low Credits</CardDescription>
+            <CardTitle className="text-2xl text-yellow-400">
+              {USAGE_DATA.filter(u => u.status === "warning" || u.status === "critical").length}
+            </CardTitle>
+          </CardHeader>
+        </Card>
+      </div>
+
+      {/* Filters */}
+      <div className="flex gap-3">
+        <div className="relative flex-1 max-w-sm">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+          <Input
+            placeholder="Search companies..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="pl-9"
+          />
+        </div>
+        <Select value={filter} onValueChange={setFilter}>
+          <SelectTrigger className="w-[180px]">
+            <Filter className="w-4 h-4 mr-2" />
+            <SelectValue placeholder="Filter by status" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Status</SelectItem>
+            <SelectItem value="active">Healthy</SelectItem>
+            <SelectItem value="warning">Low Credits</SelectItem>
+            <SelectItem value="critical">Critical</SelectItem>
+            <SelectItem value="suspended">Exhausted</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      {/* Usage Table */}
+      <div className="bg-card border border-border rounded-xl overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-border bg-secondary/30">
+                <th className="text-left px-5 py-3 text-muted-foreground font-medium">Company</th>
+                <th className="text-left px-5 py-3 text-muted-foreground font-medium">Plan</th>
+                <th className="text-left px-5 py-3 text-muted-foreground font-medium">Credits Used</th>
+                <th className="text-left px-5 py-3 text-muted-foreground font-medium">API Calls</th>
+                <th className="text-left px-5 py-3 text-muted-foreground font-medium">Last Used</th>
+                <th className="text-left px-5 py-3 text-muted-foreground font-medium">Status</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-border">
+              {filtered.map((u) => {
+                const usagePercent = (u.creditsUsed / u.creditsTotal) * 100;
+                const status = statusConfig[u.status];
+                const StatusIcon = status.icon;
+
+                return (
+                  <tr key={u.id} className="hover:bg-secondary/20 transition-colors">
+                    <td className="px-5 py-3.5">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-lg bg-secondary flex items-center justify-center text-xs font-bold text-foreground">
+                          {u.company[0]}
+                        </div>
+                        <p className="font-medium text-foreground">{u.company}</p>
+                      </div>
+                    </td>
+                    <td className="px-5 py-3.5 text-muted-foreground">{u.plan}</td>
+                    <td className="px-5 py-3.5">
+                      <div className="space-y-1">
+                        <div className="flex items-center justify-between text-xs">
+                          <span className="text-muted-foreground">{u.creditsUsed} / {u.creditsTotal}</span>
+                          <span className="text-muted-foreground">{u.creditsRemaining} left</span>
+                        </div>
+                        <div className="w-full bg-secondary rounded-full h-2">
+                          <div
+                            className={`h-2 rounded-full transition-all ${
+                              usagePercent > 90 ? "bg-red-500" : usagePercent > 70 ? "bg-yellow-500" : "bg-green-500"
+                            }`}
+                            style={{ width: `${usagePercent}%` }}
+                          />
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-5 py-3.5">
+                      <span className="flex items-center gap-1.5 text-muted-foreground">
+                        <TrendingUp className="w-3.5 h-3.5" /> {u.apiCalls.toLocaleString()}
+                      </span>
+                    </td>
+                    <td className="px-5 py-3.5 text-muted-foreground">{u.lastUsed}</td>
+                    <td className="px-5 py-3.5">
+                      <span className={`inline-flex items-center gap-1.5 text-xs px-2 py-0.5 rounded-full border font-medium ${status.bg} ${status.color} ${status.border}`}>
+                        <StatusIcon className="w-3 h-3" />
+                        {status.label}
+                      </span>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
+}

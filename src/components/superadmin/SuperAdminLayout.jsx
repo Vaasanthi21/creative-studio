@@ -10,14 +10,20 @@ import {
   LogOut,
   Menu,
   X,
+  BarChart3,
+  Zap,
+  Layers,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 
 const NAV = [
   { label: "Dashboard", icon: LayoutDashboard, path: "/superadmin/dashboard" },
+  { label: "Analytics", icon: BarChart3, path: "/superadmin/analytics" },
   { label: "Companies", icon: Building2, path: "/superadmin/companies" },
   { label: "Users", icon: Users, path: "/superadmin/users" },
+  { label: "Usage", icon: Zap, path: "/superadmin/usage" },
+  { label: "Plans", icon: Layers, path: "/superadmin/plans" },
   { label: "Billing", icon: CreditCard, path: "/superadmin/billing" },
   { label: "Settings", icon: Settings, path: "/superadmin/settings" },
 ];

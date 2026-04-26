@@ -19,6 +19,9 @@ import SuperAdminCompanies from './pages/superadmin/SuperAdminCompanies';
 import SuperAdminUsers from './pages/superadmin/SuperAdminUsers';
 import SuperAdminBilling from './pages/superadmin/SuperAdminBilling';
 import SuperAdminSettings from './pages/superadmin/SuperAdminSettings';
+import SuperAdminAnalytics from './pages/superadmin/SuperAdminAnalytics';
+import SuperAdminUsage from './pages/superadmin/SuperAdminUsage';
+import SuperAdminPlans from './pages/superadmin/SuperAdminPlans';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isAuthenticated, authError, navigateToLogin } = useAuth();
@@ -67,8 +70,11 @@ const AuthenticatedApp = () => {
       <Route path="/superadmin/login" element={<SuperAdminLogin />} />
       <Route element={<SuperAdminLayout />}>
         <Route path="/superadmin/dashboard" element={<SuperAdminDashboard />} />
+        <Route path="/superadmin/analytics" element={<SuperAdminAnalytics />} />
         <Route path="/superadmin/companies" element={<SuperAdminCompanies />} />
         <Route path="/superadmin/users" element={<SuperAdminUsers />} />
+        <Route path="/superadmin/usage" element={<SuperAdminUsage />} />
+        <Route path="/superadmin/plans" element={<SuperAdminPlans />} />
         <Route path="/superadmin/billing" element={<SuperAdminBilling />} />
         <Route path="/superadmin/settings" element={<SuperAdminSettings />} />
       </Route>
