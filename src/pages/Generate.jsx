@@ -34,47 +34,78 @@ ${params.keywords ? `Keywords to include: ${params.keywords}` : ""}
 
 For each variant, provide a different angle or approach. Make sure the content is professional, engaging, and brand-appropriate.`;
 
-      const result = await base44.integrations.Core.InvokeLLM({
-        prompt,
-        response_json_schema: {
-          type: "object",
-          properties: {
-            variants: {
-              type: "array",
-              items: {
-                type: "object",
-                properties: {
-                  title: { type: "string", description: "Short title for this variant" },
-                  content: { type: "string", description: "The full content" },
-                  word_count: { type: "number", description: "Approximate word count" },
+      console.log('Starting generation with Base44...');
+      console.log('App ID:', base44.config?.appId);
+      console.log('Base URL:', base44.config?.appBaseUrl);
+
+      try {
+        const result = await base44.integrations.Core.InvokeLLM({
+          prompt,
+          response_json_schema: {
+            type: "object",
+            properties: {
+              variants: {
+                type: "array",
+                items: {
+                  type: "object",
+                  properties: {
+                    title: { type: "string", description: "Short title for this variant" },
+                    content: { type: "string", description: "The full content" },
+                    word_count: { type: "number", description: "Approximate word count" },
+                  },
                 },
               },
             },
           },
-        },
-      });
+        });
 
-      // Save to history
-      await base44.entities.ContentHistory.create({
-        topic: params.topic,
-        persona: activePersona,
-        persona_label: persona.label,
-        content_type: params.contentType,
-        tone: params.tone,
-        length: params.length,
-        keywords: params.keywords,
-        variants: result.variants,
-        status: "completed",
-      });
+        console.log('LLM Result:', result);
 
-      return result.variants;
+        // Save to history
+        try {
+          await base44.entities.ContentHistory.create({
+            topic: params.topic,
+            persona: activePersona,
+            persona_label: persona.label,
+            content_type: params.contentType,
+            tone: params.tone,
+            length: params.length,
+            keywords: params.keywords,
+            variants: result.variants,
+            status: "completed",
+          });
+        } catch (historyError) {
+          console.warn('Failed to save to history:', historyError);
+          // Continue anyway - don't fail the generation if history save fails
+        }
+
+        return result.variants;
+      } catch (error) {
+        console.error('Generation error:', error);
+        console.error('Error details:', {
+          message: error.message,
+          status: error.status,
+          data: error.data,
+          stack: error.stack
+        });
+        throw error;
+      }
     },
     onSuccess: (data) => {
       setVariants(data);
       toast({ title: "Content generated successfully!", duration: 2000 });
     },
     onError: (error) => {
-      toast({ title: "Generation failed", description: error.message, variant: "destructive" });
+      console.error('Mutation error:', error);
+      const errorMessage = error.status === 401 || error.status === 403 
+        ? "Authentication required. Please access the app through Base44."
+        : error.message || "Unknown error occurred";
+      toast({ 
+        title: "Generation failed", 
+        description: errorMessage, 
+        variant: "destructive",
+        duration: 5000 
+      });
     },
   });
 
