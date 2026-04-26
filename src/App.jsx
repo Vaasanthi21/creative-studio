@@ -11,6 +11,7 @@ import History from './pages/History';
 import Settings from './pages/Settings';
 import PersonaSelect from './pages/PersonaSelect';
 import Register from './pages/Register';
+import Login from './pages/Login';
 import SuperAdminLogin from './pages/superadmin/SuperAdminLogin';
 import SuperAdminLayout from './components/superadmin/SuperAdminLayout';
 import SuperAdminDashboard from './pages/superadmin/SuperAdminDashboard';
@@ -45,6 +46,7 @@ const AuthenticatedApp = () => {
   // Render the main app
   return (
     <Routes>
+      <Route path="/login" element={<Login />} />
       <Route element={<MainLayout />}>
         <Route path="/" element={<Generate />} />
         <Route path="/history" element={<History />} />

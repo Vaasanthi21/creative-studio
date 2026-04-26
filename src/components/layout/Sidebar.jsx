@@ -1,9 +1,9 @@
 import React from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Home, Clock, Settings, Sparkles, ChevronRight, LogOut } from "lucide-react";
 import { PERSONAS, getPersonaById } from "@/lib/personas";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { base44 } from "@/api/base44Client";
+import { useAuth } from "@/lib/AuthContext";
 
 const navItems = [
   { icon: Sparkles, label: "Generate", path: "/" },
@@ -13,7 +13,14 @@ const navItems = [
 
 export default function Sidebar({ activePersona, onPersonaChange, collapsed }) {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { signOut } = useAuth();
   const persona = getPersonaById(activePersona);
+
+  const handleLogout = async () => {
+    await signOut();
+    navigate('/login');
+  };
 
   return (
     <aside
@@ -110,7 +117,7 @@ export default function Sidebar({ activePersona, onPersonaChange, collapsed }) {
           <Tooltip>
             <TooltipTrigger asChild>
               <button
-                onClick={() => base44.auth.logout()}
+                onClick={handleLogout}
                 className="flex items-center gap-2.5 px-2.5 py-2 rounded-md text-[13px] w-full text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors"
               >
                 <LogOut className="w-4 h-4 shrink-0" />

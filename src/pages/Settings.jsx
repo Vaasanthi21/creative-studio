@@ -1,10 +1,11 @@
 import React, { useState } from "react";
-import { base44 } from "@/api/base44Client";
+import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { useAuth } from "@/lib/AuthContext";
 import {
   Moon,
   Sun,
@@ -25,26 +26,16 @@ import { toast } from "@/components/ui/use-toast";
 import ConfirmDialog from "@/components/dialogs/ConfirmDialog";
 
 export default function Settings() {
+  const navigate = useNavigate();
+  const { user, signOut } = useAuth();
   const [darkMode, setDarkMode] = useState(true);
   const [showApiKey, setShowApiKey] = useState(false);
   const [logoutConfirm, setLogoutConfirm] = useState(false);
 
-  const { data: user } = useQuery({
-    queryKey: ["currentUser"],
-    queryFn: () => base44.auth.me(),
-  });
-
-  const { data: history = [] } = useQuery({
-    queryKey: ["contentHistory"],
-    queryFn: () => base44.entities.ContentHistory.list("-created_date", 50),
-  });
-
-  const generationsThisMonth = history.filter((h) => {
-    if (!h.created_date) return false;
-    const d = new Date(h.created_date);
-    const now = new Date();
-    return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
-  }).length;
+  const handleLogout = async () => {
+    await signOut();
+    navigate('/login');
+  };
 
   const maskedKey = "sk-••••••••••••••••••••••4f2e";
 
@@ -220,7 +211,7 @@ export default function Settings() {
           <Button
             variant="outline"
             className="w-full gap-2 border-primary/30 text-primary hover:bg-primary/10"
-            onClick={() => base44.auth.logout()}
+            onClick={handleLogout}
           >
             <ArrowRightLeft className="w-4 h-4" />
             Sign Out & Switch Company
@@ -244,7 +235,7 @@ export default function Settings() {
       <ConfirmDialog
         open={logoutConfirm}
         onClose={() => setLogoutConfirm(false)}
-        onConfirm={() => base44.auth.logout()}
+        onConfirm={handleLogout}
         title="Sign out?"
         description="You'll need to sign in again to access the studio."
         confirmLabel="Sign Out"

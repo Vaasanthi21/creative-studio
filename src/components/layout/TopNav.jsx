@@ -1,13 +1,20 @@
 import React from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { Menu, LogOut, Wifi, WifiOff } from "lucide-react";
 import { getPersonaById } from "@/lib/personas";
 import { Button } from "@/components/ui/button";
-import { base44 } from "@/api/base44Client";
+import { useAuth } from "@/lib/AuthContext";
 
 export default function TopNav({ activePersona, onToggleSidebar }) {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { signOut } = useAuth();
   const persona = getPersonaById(activePersona);
+
+  const handleLogout = async () => {
+    await signOut();
+    navigate('/login');
+  };
 
   const getPageTitle = () => {
     switch (location.pathname) {
@@ -68,7 +75,7 @@ export default function TopNav({ activePersona, onToggleSidebar }) {
           variant="ghost"
           size="icon"
           className="h-8 w-8 text-muted-foreground hover:text-foreground"
-          onClick={() => base44.auth.logout()}
+          onClick={handleLogout}
         >
           <LogOut className="w-4 h-4" />
         </Button>
