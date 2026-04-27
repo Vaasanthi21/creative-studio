@@ -1,8 +1,7 @@
 import React, { useState } from "react";
 import { Search, Zap, AlertTriangle, CheckCircle, TrendingUp, Filter } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Select,
   SelectContent,
@@ -12,61 +11,11 @@ import {
 } from "@/components/ui/select";
 
 const USAGE_DATA = [
-  { 
-    id: 1, 
-    company: "Uden Tech", 
-    plan: "Pro", 
-    creditsTotal: 1000, 
-    creditsUsed: 847, 
-    creditsRemaining: 153,
-    apiCalls: 2840,
-    lastUsed: "2 hours ago",
-    status: "active" 
-  },
-  { 
-    id: 2, 
-    company: "Pixel Works", 
-    plan: "Pro", 
-    creditsTotal: 1000, 
-    creditsUsed: 720, 
-    creditsRemaining: 280,
-    apiCalls: 2150,
-    lastUsed: "5 hours ago",
-    status: "active" 
-  },
-  { 
-    id: 3, 
-    company: "Brandify Co.", 
-    plan: "Starter", 
-    creditsTotal: 500, 
-    creditsUsed: 485, 
-    creditsRemaining: 15,
-    apiCalls: 1680,
-    lastUsed: "1 day ago",
-    status: "warning" 
-  },
-  { 
-    id: 4, 
-    company: "Nova Labs", 
-    plan: "Trial", 
-    creditsTotal: 100, 
-    creditsUsed: 92, 
-    creditsRemaining: 8,
-    apiCalls: 980,
-    lastUsed: "3 days ago",
-    status: "critical" 
-  },
-  { 
-    id: 5, 
-    company: "MarkNet", 
-    plan: "Trial", 
-    creditsTotal: 100, 
-    creditsUsed: 100, 
-    creditsRemaining: 0,
-    apiCalls: 420,
-    lastUsed: "7 days ago",
-    status: "suspended" 
-  },
+  { id: 1, company: "Uden Tech", plan: "Pro", creditsTotal: 1000, creditsUsed: 847, creditsRemaining: 153, apiCalls: 2840, lastUsed: "2 hours ago", status: "active" },
+  { id: 2, company: "Pixel Works", plan: "Pro", creditsTotal: 1000, creditsUsed: 720, creditsRemaining: 280, apiCalls: 2150, lastUsed: "5 hours ago", status: "active" },
+  { id: 3, company: "Brandify Co.", plan: "Starter", creditsTotal: 500, creditsUsed: 485, creditsRemaining: 15, apiCalls: 1680, lastUsed: "1 day ago", status: "warning" },
+  { id: 4, company: "Nova Labs", plan: "Trial", creditsTotal: 100, creditsUsed: 92, creditsRemaining: 8, apiCalls: 980, lastUsed: "3 days ago", status: "critical" },
+  { id: 5, company: "MarkNet", plan: "Trial", creditsTotal: 100, creditsUsed: 100, creditsRemaining: 0, apiCalls: 420, lastUsed: "7 days ago", status: "suspended" },
 ];
 
 const statusConfig = {
@@ -87,10 +36,12 @@ export default function SuperAdminUsage() {
   });
 
   const totalApiCalls = USAGE_DATA.reduce((sum, u) => sum + u.apiCalls, 0);
-  const avgUsage = Math.round(USAGE_DATA.reduce((sum, u) => sum + (u.creditsUsed / u.creditsTotal) * 100, 0) / USAGE_DATA.length);
+  const avgUsage = Math.round(
+    USAGE_DATA.reduce((sum, u) => sum + (u.creditsUsed / u.creditsTotal) * 100, 0) / USAGE_DATA.length
+  );
 
   return (
-    <div className="space-y-6 max-w-7xl">
+    <div className="space-y-6 w-full max-w-7xl mx-auto px-4 sm:px-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="font-display text-2xl font-bold text-foreground">Usage Monitoring</h1>
@@ -106,25 +57,27 @@ export default function SuperAdminUsage() {
             <CardTitle className="text-2xl">{totalApiCalls.toLocaleString()}</CardTitle>
           </CardHeader>
         </Card>
+
         <Card>
           <CardHeader className="pb-3">
             <CardDescription>Average Credit Usage</CardDescription>
             <CardTitle className="text-2xl">{avgUsage}%</CardTitle>
           </CardHeader>
         </Card>
+
         <Card>
           <CardHeader className="pb-3">
             <CardDescription>Companies with Low Credits</CardDescription>
             <CardTitle className="text-2xl text-yellow-400">
-              {USAGE_DATA.filter(u => u.status === "warning" || u.status === "critical").length}
+              {USAGE_DATA.filter((u) => u.status === "warning" || u.status === "critical").length}
             </CardTitle>
           </CardHeader>
         </Card>
       </div>
 
       {/* Filters */}
-      <div className="flex gap-3">
-        <div className="relative flex-1 max-w-sm">
+      <div className="flex flex-col sm:flex-row gap-3">
+        <div className="relative w-full sm:max-w-sm">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input
             placeholder="Search companies..."
@@ -133,8 +86,9 @@ export default function SuperAdminUsage() {
             className="pl-9"
           />
         </div>
+
         <Select value={filter} onValueChange={setFilter}>
-          <SelectTrigger className="w-[180px]">
+          <SelectTrigger className="w-full sm:w-[180px]">
             <Filter className="w-4 h-4 mr-2" />
             <SelectValue placeholder="Filter by status" />
           </SelectTrigger>
@@ -148,8 +102,8 @@ export default function SuperAdminUsage() {
         </Select>
       </div>
 
-      {/* Usage Table */}
-      <div className="bg-card border border-border rounded-xl overflow-hidden">
+      {/* ================= DESKTOP TABLE ================= */}
+      <div className="hidden md:block bg-card border border-border rounded-xl overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
@@ -162,57 +116,148 @@ export default function SuperAdminUsage() {
                 <th className="text-left px-5 py-3 text-muted-foreground font-medium">Status</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-border">
-              {filtered.map((u) => {
-                const usagePercent = (u.creditsUsed / u.creditsTotal) * 100;
-                const status = statusConfig[u.status];
-                const StatusIcon = status.icon;
 
-                return (
-                  <tr key={u.id} className="hover:bg-secondary/20 transition-colors">
-                    <td className="px-5 py-3.5">
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-lg bg-secondary flex items-center justify-center text-xs font-bold text-foreground">
-                          {u.company[0]}
+            <tbody className="divide-y divide-border">
+              {filtered.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="px-5 py-8 text-center text-sm text-muted-foreground">
+                    No usage records found
+                  </td>
+                </tr>
+              ) : (
+                filtered.map((u) => {
+                  const usagePercent = (u.creditsUsed / u.creditsTotal) * 100;
+                  const status = statusConfig[u.status];
+                  const StatusIcon = status.icon;
+
+                  return (
+                    <tr key={u.id} className="hover:bg-secondary/20 transition-colors">
+                      <td className="px-5 py-3.5">
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 rounded-lg bg-secondary flex items-center justify-center text-xs font-bold text-foreground">
+                            {u.company[0]}
+                          </div>
+                          <p className="font-medium text-foreground">{u.company}</p>
                         </div>
-                        <p className="font-medium text-foreground">{u.company}</p>
-                      </div>
-                    </td>
-                    <td className="px-5 py-3.5 text-muted-foreground">{u.plan}</td>
-                    <td className="px-5 py-3.5">
-                      <div className="space-y-1">
-                        <div className="flex items-center justify-between text-xs">
-                          <span className="text-muted-foreground">{u.creditsUsed} / {u.creditsTotal}</span>
-                          <span className="text-muted-foreground">{u.creditsRemaining} left</span>
+                      </td>
+
+                      <td className="px-5 py-3.5 text-muted-foreground">{u.plan}</td>
+
+                      <td className="px-5 py-3.5">
+                        <div className="space-y-1">
+                          <div className="flex items-center justify-between text-xs">
+                            <span className="text-muted-foreground">
+                              {u.creditsUsed} / {u.creditsTotal}
+                            </span>
+                            <span className="text-muted-foreground">{u.creditsRemaining} left</span>
+                          </div>
+                          <div className="w-full bg-secondary rounded-full h-2">
+                            <div
+                              className={`h-2 rounded-full transition-all ${
+                                usagePercent > 90
+                                  ? "bg-red-500"
+                                  : usagePercent > 70
+                                  ? "bg-yellow-500"
+                                  : "bg-green-500"
+                              }`}
+                              style={{ width: `${usagePercent}%` }}
+                            />
+                          </div>
                         </div>
-                        <div className="w-full bg-secondary rounded-full h-2">
-                          <div
-                            className={`h-2 rounded-full transition-all ${
-                              usagePercent > 90 ? "bg-red-500" : usagePercent > 70 ? "bg-yellow-500" : "bg-green-500"
-                            }`}
-                            style={{ width: `${usagePercent}%` }}
-                          />
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-5 py-3.5">
-                      <span className="flex items-center gap-1.5 text-muted-foreground">
-                        <TrendingUp className="w-3.5 h-3.5" /> {u.apiCalls.toLocaleString()}
-                      </span>
-                    </td>
-                    <td className="px-5 py-3.5 text-muted-foreground">{u.lastUsed}</td>
-                    <td className="px-5 py-3.5">
-                      <span className={`inline-flex items-center gap-1.5 text-xs px-2 py-0.5 rounded-full border font-medium ${status.bg} ${status.color} ${status.border}`}>
-                        <StatusIcon className="w-3 h-3" />
-                        {status.label}
-                      </span>
-                    </td>
-                  </tr>
-                );
-              })}
+                      </td>
+
+                      <td className="px-5 py-3.5">
+                        <span className="flex items-center gap-1.5 text-muted-foreground">
+                          <TrendingUp className="w-3.5 h-3.5" /> {u.apiCalls.toLocaleString()}
+                        </span>
+                      </td>
+
+                      <td className="px-5 py-3.5 text-muted-foreground">{u.lastUsed}</td>
+
+                      <td className="px-5 py-3.5">
+                        <span className={`inline-flex items-center gap-1.5 text-xs px-2 py-0.5 rounded-full border font-medium ${status.bg} ${status.color} ${status.border}`}>
+                          <StatusIcon className="w-3 h-3" />
+                          {status.label}
+                        </span>
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
             </tbody>
           </table>
         </div>
+      </div>
+
+      {/* ================= MOBILE CARDS ================= */}
+      <div className="md:hidden space-y-3">
+        {filtered.length === 0 ? (
+          <div className="bg-card border border-border rounded-xl p-6 text-center text-sm text-muted-foreground">
+            No usage records found
+          </div>
+        ) : (
+          filtered.map((u) => {
+            const usagePercent = (u.creditsUsed / u.creditsTotal) * 100;
+            const status = statusConfig[u.status];
+            const StatusIcon = status.icon;
+
+            return (
+              <div key={u.id} className="bg-card border border-border rounded-xl p-4 space-y-4">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="w-9 h-9 rounded-lg bg-secondary flex items-center justify-center text-xs font-bold text-foreground flex-shrink-0">
+                      {u.company[0]}
+                    </div>
+
+                    <div className="min-w-0">
+                      <p className="font-medium text-foreground truncate">{u.company}</p>
+                      <p className="text-xs text-muted-foreground">{u.plan}</p>
+                    </div>
+                  </div>
+
+                  <span className={`inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full border font-medium flex-shrink-0 ${status.bg} ${status.color} ${status.border}`}>
+                    <StatusIcon className="w-3 h-3" />
+                    {status.label}
+                  </span>
+                </div>
+
+                <div>
+                  <div className="flex items-center justify-between text-xs mb-1">
+                    <span className="text-muted-foreground">
+                      {u.creditsUsed} / {u.creditsTotal} credits
+                    </span>
+                    <span className="text-muted-foreground">{u.creditsRemaining} left</span>
+                  </div>
+
+                  <div className="w-full bg-secondary rounded-full h-2">
+                    <div
+                      className={`h-2 rounded-full transition-all ${
+                        usagePercent > 90
+                          ? "bg-red-500"
+                          : usagePercent > 70
+                          ? "bg-yellow-500"
+                          : "bg-green-500"
+                      }`}
+                      style={{ width: `${usagePercent}%` }}
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3 text-xs">
+                  <div>
+                    <p className="text-muted-foreground">API Calls</p>
+                    <p className="text-foreground font-medium">{u.apiCalls.toLocaleString()}</p>
+                  </div>
+
+                  <div>
+                    <p className="text-muted-foreground">Last Used</p>
+                    <p className="text-foreground font-medium">{u.lastUsed}</p>
+                  </div>
+                </div>
+              </div>
+            );
+          })
+        )}
       </div>
     </div>
   );

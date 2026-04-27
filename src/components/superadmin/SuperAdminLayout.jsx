@@ -8,8 +8,6 @@ import {
   Settings,
   ShieldCheck,
   LogOut,
-  Menu,
-  X,
   BarChart3,
   Zap,
   Layers,
@@ -34,7 +32,7 @@ export default function SuperAdminLayout() {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const handleLogout = () => {
-    // TODO: Wire to Neeta's backend logout
+    // TODO: Wire to backend logout
     navigate("/superadmin/login");
   };
 
@@ -105,24 +103,28 @@ export default function SuperAdminLayout() {
       {/* Main */}
       <div className="flex-1 md:ml-60 flex flex-col min-h-screen">
         {/* Topbar */}
-        <header className="sticky top-0 z-20 bg-card/80 backdrop-blur border-b border-border px-6 py-3 flex items-center justify-between">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="md:hidden"
+        <header className="sticky top-0 z-20 bg-card/80 backdrop-blur border-b border-border px-4 sm:px-6 py-3 flex items-center justify-between">
+          <button
+            type="button"
+            className="md:hidden inline-flex h-9 w-9 items-center justify-center rounded-md text-muted-foreground hover:bg-secondary hover:text-foreground"
             onClick={() => setMobileOpen(!mobileOpen)}
+            aria-label="Toggle menu"
           >
-            {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-          </Button>
+            <span className="text-xl leading-none">
+              {mobileOpen ? "×" : "☰"}
+            </span>
+          </button>
+
           <p className="text-sm text-muted-foreground hidden md:block">
             Logged in as <span className="text-foreground font-medium">superadmin@creativestudio.com</span>
           </p>
+
           <span className="text-xs bg-primary/10 text-primary border border-primary/20 px-2.5 py-1 rounded-full font-medium">
             Superadmin
           </span>
         </header>
 
-        <main className="flex-1 p-6">
+        <main className="flex-1 p-4 sm:p-6">
           <Outlet />
         </main>
       </div>

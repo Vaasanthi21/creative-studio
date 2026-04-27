@@ -24,14 +24,14 @@ const STATS = [
 
 export default function SuperAdminBilling() {
   return (
-    <div className="space-y-6 max-w-6xl">
+    <div className="space-y-6 w-full max-w-6xl mx-auto px-4 sm:px-6">
       <div>
         <h1 className="font-display text-2xl font-bold text-foreground">Billing</h1>
         <p className="text-muted-foreground text-sm">Revenue and subscription overview</p>
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
         {STATS.map(({ label, value, icon: Icon }) => (
           <div key={label} className="bg-card border border-border rounded-xl p-5">
             <div className="flex items-center justify-between mb-3">
@@ -45,11 +45,12 @@ export default function SuperAdminBilling() {
         ))}
       </div>
 
-      {/* Billing Table */}
-      <div className="bg-card border border-border rounded-xl overflow-hidden">
+      {/* Desktop / Tablet Table */}
+      <div className="hidden md:block bg-card border border-border rounded-xl overflow-hidden">
         <div className="px-5 py-4 border-b border-border">
           <h2 className="font-display font-semibold text-foreground">Subscription Details</h2>
         </div>
+
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
@@ -61,6 +62,7 @@ export default function SuperAdminBilling() {
                 <th className="text-left px-5 py-3 text-muted-foreground font-medium">Next Renewal</th>
               </tr>
             </thead>
+
             <tbody className="divide-y divide-border">
               {BILLING.map((b) => (
                 <tr key={b.company} className="hover:bg-secondary/20 transition-colors">
@@ -78,6 +80,36 @@ export default function SuperAdminBilling() {
             </tbody>
           </table>
         </div>
+      </div>
+
+      {/* Mobile Cards */}
+      <div className="md:hidden space-y-3">
+        {BILLING.map((b) => (
+          <div key={b.company} className="bg-card border border-border rounded-xl p-4 space-y-3">
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <p className="font-medium text-foreground truncate">{b.company}</p>
+                <p className="text-xs text-muted-foreground">{b.plan}</p>
+              </div>
+
+              <span className={`text-xs px-2 py-0.5 rounded-full border font-medium flex-shrink-0 ${statusStyles[b.status]}`}>
+                {b.status}
+              </span>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3 text-xs">
+              <div>
+                <p className="text-muted-foreground">Amount</p>
+                <p className="text-foreground font-medium">{b.amount}</p>
+              </div>
+
+              <div>
+                <p className="text-muted-foreground">Next Renewal</p>
+                <p className="text-foreground font-medium">{b.next}</p>
+              </div>
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   );
