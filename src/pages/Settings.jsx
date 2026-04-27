@@ -21,6 +21,7 @@ import {
   ExternalLink,
   Building2,
   ArrowRightLeft,
+  ShieldCheck,
 } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
 import ConfirmDialog from "@/components/dialogs/ConfirmDialog";
