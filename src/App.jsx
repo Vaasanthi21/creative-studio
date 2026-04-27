@@ -12,6 +12,7 @@ import Settings from './pages/Settings';
 import PersonaSelect from './pages/PersonaSelect';
 import Register from './pages/Register';
 import Login from './pages/Login';
+
 import SuperAdminLogin from './pages/superadmin/SuperAdminLogin';
 import SuperAdminLayout from './components/superadmin/SuperAdminLayout';
 import SuperAdminDashboard from './pages/superadmin/SuperAdminDashboard';
@@ -26,7 +27,7 @@ import SuperAdminPlans from './pages/superadmin/SuperAdminPlans';
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isAuthenticated, authError, navigateToLogin } = useAuth();
 
-  // Show loading spinner while checking auth
+  // Loading
   if (isLoadingAuth) {
     return (
       <div className="fixed inset-0 flex items-center justify-center">
@@ -35,7 +36,7 @@ const AuthenticatedApp = () => {
     );
   }
 
-  // Handle authentication errors
+  // Auth errors
   if (authError) {
     if (authError.type === 'user_not_registered') {
       return <UserNotRegisteredError />;
@@ -45,29 +46,38 @@ const AuthenticatedApp = () => {
     }
   }
 
-  // If not authenticated, redirect to login
+  // ❗ NOT AUTHENTICATED → ONLY LOGIN + SUPERADMIN LOGIN
   if (!isAuthenticated) {
     return (
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+
+        {/* ✅ allow superadmin login page */}
+        <Route path="/superadmin/login" element={<SuperAdminLogin />} />
+
         <Route path="*" element={<Login />} />
       </Routes>
     );
   }
 
-  // Render the main app
+  // ✅ AUTHENTICATED APP
   return (
     <Routes>
       <Route path="/login" element={<Login />} />
+
       <Route element={<MainLayout />}>
         <Route path="/" element={<Generate />} />
         <Route path="/history" element={<History />} />
         <Route path="/settings" element={<Settings />} />
         <Route path="/personas" element={<PersonaSelect />} />
       </Route>
+
       <Route path="/register" element={<Register />} />
+
+      {/* Superadmin routes (protected by auth) */}
       <Route path="/superadmin/login" element={<SuperAdminLogin />} />
+
       <Route element={<SuperAdminLayout />}>
         <Route path="/superadmin/dashboard" element={<SuperAdminDashboard />} />
         <Route path="/superadmin/analytics" element={<SuperAdminAnalytics />} />
@@ -78,14 +88,13 @@ const AuthenticatedApp = () => {
         <Route path="/superadmin/billing" element={<SuperAdminBilling />} />
         <Route path="/superadmin/settings" element={<SuperAdminSettings />} />
       </Route>
+
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
 };
 
-
 function App() {
-
   return (
     <AuthProvider>
       <QueryClientProvider client={queryClientInstance}>
@@ -98,4 +107,4 @@ function App() {
   )
 }
 
-export default App
+export default App;
