@@ -6,7 +6,14 @@ import { format } from "date-fns";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Search, Trash2, Eye, Clock, Loader2 } from "lucide-react";
+import { Search, Trash2, Eye, Clock, Loader2, Filter } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import VariantExpandedModal from "@/components/generate/VariantExpandedModal";
 import ExportDialog from "@/components/dialogs/ExportDialog";
 import ConfirmDialog from "@/components/dialogs/ConfirmDialog";
@@ -16,10 +23,16 @@ import { getPersonaById } from "@/lib/personas";
 export default function History() {
   const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
+  const [platformFilter, setPlatformFilter] = useState("all");
+  const [contentTypeFilter, setContentTypeFilter] = useState("all");
+  const [dateFilter, setDateFilter] = useState("all");
   const [expandedVariant, setExpandedVariant] = useState(null);
   const [exportVariant, setExportVariant] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [selectedEntry, setSelectedEntry] = useState(null);
+
+  const platforms = ["LinkedIn", "Instagram", "Facebook", "Twitter/X", "YouTube"];
+  const contentTypes = ["Post", "Article", "Caption", "Script", "Carousel"];
 
   const { data: history = [], isLoading } = useQuery({
     queryKey: ["contentHistory"],
@@ -39,7 +52,31 @@ export default function History() {
     .filter((h) => h.status !== "deleted")
     .filter((h) =>
       search ? h.topic.toLowerCase().includes(search.toLowerCase()) : true
-    );
+    )
+    .filter((h) => {
+      if (platformFilter === "all") return true;
+      return h.platform === platformFilter;
+    })
+    .filter((h) => {
+      if (contentTypeFilter === "all") return true;
+      return h.content_type?.toLowerCase().includes(contentTypeFilter.toLowerCase());
+    })
+    .filter((h) => {
+      if (dateFilter === "all") return true;
+      const entryDate = new Date(h.created_date);
+      const now = new Date();
+      
+      if (dateFilter === "today") {
+        return entryDate.toDateString() === now.toDateString();
+      } else if (dateFilter === "week") {
+        const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+        return entryDate >= weekAgo;
+      } else if (dateFilter === "month") {
+        const monthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+        return entryDate >= monthAgo;
+      }
+      return true;
+    });
 
   return (
     <div className="p-4 md:p-6 max-w-5xl mx-auto space-y-5">
@@ -57,6 +94,69 @@ export default function History() {
             className="pl-9 bg-muted border-border text-sm"
           />
         </div>
+      </div>
+
+      {/* Filters */}
+      <div className="flex flex-wrap gap-3 items-center">
+        <div className="flex items-center gap-2">
+          <Filter className="w-4 h-4 text-muted-foreground" />
+          <span className="text-xs font-medium text-muted-foreground">Filters:</span>
+        </div>
+        
+        <Select value={platformFilter} onValueChange={setPlatformFilter}>
+          <SelectTrigger className="w-[140px] bg-muted border-border text-xs">
+            <SelectValue placeholder="Platform" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Platforms</SelectItem>
+            {platforms.map((p) => (
+              <SelectItem key={p} value={p}>
+                {p}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+
+        <Select value={contentTypeFilter} onValueChange={setContentTypeFilter}>
+          <SelectTrigger className="w-[140px] bg-muted border-border text-xs">
+            <SelectValue placeholder="Content Type" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Types</SelectItem>
+            {contentTypes.map((ct) => (
+              <SelectItem key={ct} value={ct}>
+                {ct}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+
+        <Select value={dateFilter} onValueChange={setDateFilter}>
+          <SelectTrigger className="w-[140px] bg-muted border-border text-xs">
+            <SelectValue placeholder="Date Range" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Time</SelectItem>
+            <SelectItem value="today">Today</SelectItem>
+            <SelectItem value="week">Past Week</SelectItem>
+            <SelectItem value="month">Past Month</SelectItem>
+          </SelectContent>
+        </Select>
+
+        {(platformFilter !== "all" || contentTypeFilter !== "all" || dateFilter !== "all") && (
+          <Button
+            variant="outline"
+            size="sm"
+            className="text-xs"
+            onClick={() => {
+              setPlatformFilter("all");
+              setContentTypeFilter("all");
+              setDateFilter("all");
+            }}
+          >
+            Clear Filters
+          </Button>
+        )}
       </div>
 
       {isLoading ? (
