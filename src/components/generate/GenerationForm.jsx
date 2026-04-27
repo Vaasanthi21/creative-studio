@@ -14,9 +14,14 @@ import {
 } from "@/components/ui/select";
 import { Sparkles, Loader2 } from "lucide-react";
 
+const MAX_BATCH_TOPICS = 10;
+
 export default function GenerationForm({ activePersona, onGenerate, isGenerating }) {
   const persona = getPersonaById(activePersona);
+
+  const [mode, setMode] = useState("single");
   const [topic, setTopic] = useState("");
+  const [batchTopics, setBatchTopics] = useState("");
   const [contentType, setContentType] = useState(persona.contentTypes[0]);
   const [tone, setTone] = useState([50]);
   const [length, setLength] = useState([50]);
@@ -24,21 +29,45 @@ export default function GenerationForm({ activePersona, onGenerate, isGenerating
 
   useEffect(() => {
     setContentType(persona.contentTypes[0]);
-  }, [activePersona]);
+  }, [activePersona, persona.contentTypes]);
 
+  const batchLines = batchTopics
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean);
+
+  const batchOverLimit = batchLines.length > MAX_BATCH_TOPICS;
   const charCount = topic.length;
-  const isValid = topic.trim().length > 0 && contentType;
+
+  const isValid =
+    mode === "single"
+      ? topic.trim().length > 0 && contentType
+      : batchLines.length > 0 && !batchOverLimit && contentType;
 
   const handleSubmit = useCallback(() => {
     if (!isValid || isGenerating) return;
+
     onGenerate({
+      mode,
       topic: topic.trim(),
+      topics: batchLines,
       contentType,
       tone: tone[0],
       length: length[0],
       keywords: keywords.trim(),
     });
-  }, [topic, contentType, tone, length, keywords, isValid, isGenerating, onGenerate]);
+  }, [
+    mode,
+    topic,
+    batchLines,
+    contentType,
+    tone,
+    length,
+    keywords,
+    isValid,
+    isGenerating,
+    onGenerate,
+  ]);
 
   useEffect(() => {
     const handler = (e) => {
@@ -47,6 +76,7 @@ export default function GenerationForm({ activePersona, onGenerate, isGenerating
         handleSubmit();
       }
     };
+
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
   }, [handleSubmit]);
@@ -61,25 +91,83 @@ export default function GenerationForm({ activePersona, onGenerate, isGenerating
         Generation Parameters
       </p>
 
-      {/* Topic */}
-      <div className="space-y-1.5">
-        <div className="flex justify-between items-center">
-          <Label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-            Topic *
-          </Label>
-          <span className={`text-[10px] ${charCount > 450 ? "text-destructive" : "text-muted-foreground"}`}>
-            {charCount}/500
-          </span>
-        </div>
-        <Textarea
-          value={topic}
-          onChange={(e) => setTopic(e.target.value.slice(0, 500))}
-          placeholder="What would you like to generate content about?"
-          className="bg-muted border-border text-foreground text-sm resize-none h-20 placeholder:text-muted-foreground"
-        />
+      {/* Mode */}
+      <div className="grid grid-cols-2 gap-2 bg-muted p-1 rounded-lg">
+        <button
+          type="button"
+          onClick={() => setMode("single")}
+          className={`rounded-md py-2 text-sm font-medium transition-colors ${
+            mode === "single"
+              ? "bg-background text-foreground shadow-sm"
+              : "text-muted-foreground hover:text-foreground"
+          }`}
+        >
+          Single Post
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setMode("batch")}
+          className={`rounded-md py-2 text-sm font-medium transition-colors ${
+            mode === "batch"
+              ? "bg-background text-foreground shadow-sm"
+              : "text-muted-foreground hover:text-foreground"
+          }`}
+        >
+          Batch Generation
+        </button>
       </div>
 
-      {/* Content type + Tone + Length */}
+      {/* Single Topic */}
+      {mode === "single" && (
+        <div className="space-y-1.5">
+          <div className="flex justify-between items-center">
+            <Label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+              Topic *
+            </Label>
+            <span className={`text-[10px] ${charCount > 450 ? "text-destructive" : "text-muted-foreground"}`}>
+              {charCount}/500
+            </span>
+          </div>
+
+          <Textarea
+            value={topic}
+            onChange={(e) => setTopic(e.target.value.slice(0, 500))}
+            placeholder="What would you like to generate content about?"
+            className="bg-muted border-border text-foreground text-sm resize-none h-20 placeholder:text-muted-foreground"
+          />
+        </div>
+      )}
+
+      {/* Batch Topics */}
+      {mode === "batch" && (
+        <div className="space-y-1.5">
+          <div className="flex justify-between items-center">
+            <Label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+              Batch Topics *
+            </Label>
+            <span className={`text-[10px] ${batchOverLimit ? "text-destructive" : "text-muted-foreground"}`}>
+              {batchLines.length}/{MAX_BATCH_TOPICS}
+            </span>
+          </div>
+
+          <Textarea
+            value={batchTopics}
+            onChange={(e) => setBatchTopics(e.target.value)}
+            placeholder={`Enter up to ${MAX_BATCH_TOPICS} topics, one per line...\n\nExample:\nAI career tips for students\nHow startups can use automation\nLinkedIn growth strategy for founders`}
+            className="bg-muted border-border text-foreground text-sm resize-none h-32 placeholder:text-muted-foreground"
+          />
+
+          {batchOverLimit && (
+            <p className="text-xs text-destructive">
+              You can add only {MAX_BATCH_TOPICS} topics. Remove {batchLines.length - MAX_BATCH_TOPICS} topic
+              {batchLines.length - MAX_BATCH_TOPICS > 1 ? "s" : ""} to continue.
+            </p>
+          )}
+        </div>
+      )}
+
+      {/* Content type + Keywords */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-1.5">
           <Label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
@@ -112,6 +200,7 @@ export default function GenerationForm({ activePersona, onGenerate, isGenerating
         </div>
       </div>
 
+      {/* Tone + Length */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="space-y-3">
           <div className="flex justify-between items-center">
@@ -162,12 +251,12 @@ export default function GenerationForm({ activePersona, onGenerate, isGenerating
         {isGenerating ? (
           <>
             <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-            Generating...
+            {mode === "batch" ? "Generating Batch..." : "Generating..."}
           </>
         ) : (
           <>
             <Sparkles className="w-4 h-4 mr-2" />
-            Generate Content
+            {mode === "batch" ? "Start Batch Generation" : "Generate Content"}
             <kbd className="ml-2 text-[10px] opacity-60 hidden sm:inline">⌘ Enter</kbd>
           </>
         )}
