@@ -1,6 +1,6 @@
 import React from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Home, Clock, Settings, Sparkles, ChevronRight, LogOut } from "lucide-react";
+import { Home, Clock, Settings, Sparkles, ChevronRight, LogOut, Shield } from "lucide-react";
 import { PERSONAS, getPersonaById } from "@/lib/personas";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useAuth } from "@/lib/AuthContext";
@@ -83,6 +83,24 @@ export default function Sidebar({ activePersona, onPersonaChange, collapsed }) {
           );
         })}
       </nav>
+
+      {/* Super Admin Link */}
+      <div className="px-2 py-2 border-t border-border">
+        <TooltipProvider delayDuration={0}>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Link
+                to="/superadmin/login"
+                className="flex items-center gap-2.5 px-2.5 py-2 rounded-md text-[13px] w-full text-muted-foreground hover:bg-primary/10 hover:text-primary transition-colors"
+              >
+                <Shield className="w-4 h-4 shrink-0" />
+                {!collapsed && <span>Super Admin</span>}
+              </Link>
+            </TooltipTrigger>
+            {collapsed && <TooltipContent side="right">Super Admin</TooltipContent>}
+          </Tooltip>
+        </TooltipProvider>
+      </div>
 
       {/* Persona quick-switcher */}
       {!collapsed && (
