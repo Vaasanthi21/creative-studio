@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import { useOutletContext } from "react-router-dom";
 import { generateContent, saveToHistory } from "@/services/aiService";
 import { supabase } from "@/api/supabaseClient";
@@ -18,7 +18,7 @@ export default function Generate() {
 
   const [variants, setVariants] = useState([]);
   const [batchItems, setBatchItems] = useState([]);
-  const [isCancelled, setIsCancelled] = useState(false);
+  const cancelRef = useRef(false);
   const [expandedVariant, setExpandedVariant] = useState(null);
   const [exportVariant, setExportVariant] = useState(null);
 
@@ -74,8 +74,7 @@ Respond in JSON format:
 
       // 🔥 BATCH MODE (UPDATED)
       if (params.mode === "batch") {
-        setIsCancelled(false);
-
+        cancelRef.current = false;
         const initialItems = params.topics.map((t) => ({
           topic: t,
           status: "pending",
@@ -87,7 +86,16 @@ Respond in JSON format:
         const allResults = [];
 
         for (let i = 0; i < params.topics.length; i++) {
-          if (isCancelled) break;
+          if (cancelRef.current) {
+            setBatchItems((prev) =>
+              prev.map((item, idx) =>
+                idx >= i && item.status === "pending"
+                  ? { ...item, status: "cancelled" }
+                  : item
+            )
+          );
+          break;
+        }
 
           const topic = params.topics[i];
 
@@ -191,12 +199,17 @@ Respond in JSON format:
 
       {/* 🔴 Cancel Button */}
       {generateMutation.isPending && batchItems.length > 0 && (
-        <button
-          onClick={() => setIsCancelled(true)}
-          className="text-sm text-red-500 underline"
-        >
-          Cancel Batch
-        </button>
+        <div className="flex justify-end">
+          <button
+          type="button"
+          onClick={() => {
+            cancelRef.current = true;
+          }}
+          className="px-4 py-2 rounded-md border border-red-500/30 bg-red-500/10 text-red-400 text-sm font-medium hover:bg-red-500/20 transition-colors"
+          >
+            Cancel
+          </button>
+        </div>
       )}
 
       {/* 🔵 Batch Progress */}
