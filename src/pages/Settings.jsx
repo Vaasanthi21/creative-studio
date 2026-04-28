@@ -9,19 +9,15 @@ import { useAuth } from "@/lib/AuthContext";
 import {
   Moon,
   Sun,
-  Key,
   Users,
   CreditCard,
   BarChart3,
   HelpCircle,
   Info,
   LogOut,
-  Eye,
-  EyeOff,
   ExternalLink,
   Building2,
   ArrowRightLeft,
-  ShieldCheck,
 } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
 import ConfirmDialog from "@/components/dialogs/ConfirmDialog";
@@ -30,16 +26,13 @@ export default function Settings() {
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
   const [darkMode, setDarkMode] = useState(true);
-  const [showApiKey, setShowApiKey] = useState(false);
   const [logoutConfirm, setLogoutConfirm] = useState(false);
   const generationsThisMonth = 247; // TODO: Fetch from API
 
   const handleLogout = async () => {
     await signOut();
-    navigate('/login');
+    navigate("/login");
   };
-
-  const maskedKey = "sk-••••••••••••••••••••••4f2e";
 
   const handleToggleTheme = () => {
     setDarkMode(!darkMode);
@@ -48,7 +41,9 @@ export default function Settings() {
 
   return (
     <div className="p-4 md:p-6 max-w-3xl mx-auto space-y-5">
-      <h2 className="text-lg font-display font-bold text-foreground">Settings</h2>
+      <h2 className="text-lg font-display font-bold text-foreground">
+        Settings
+      </h2>
 
       {/* Theme */}
       <Card>
@@ -62,39 +57,22 @@ export default function Settings() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-foreground">Theme</p>
-              <p className="text-xs text-muted-foreground">Switch between light and dark mode</p>
-            </div>
-            <Button variant="outline" size="sm" onClick={handleToggleTheme} className="gap-2">
-              {darkMode ? <Moon className="w-3.5 h-3.5" /> : <Sun className="w-3.5 h-3.5" />}
-              {darkMode ? "Dark" : "Light"}
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* API Key */}
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-sm font-display flex items-center gap-2">
-            <Key className="w-4 h-4 text-primary" />
-            API Configuration
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex items-center justify-between">
-            <div className="min-w-0 flex-1">
-              <p className="text-sm text-foreground">API Key</p>
-              <p className="text-xs font-mono text-muted-foreground mt-0.5">
-                {showApiKey ? "sk-proj-abc123def456ghi789jkl0mn4f2e" : maskedKey}
+              <p className="text-xs text-muted-foreground">
+                Switch between light and dark mode
               </p>
             </div>
             <Button
-              variant="ghost"
-              size="icon"
-              className="h-8 w-8"
-              onClick={() => setShowApiKey(!showApiKey)}
+              variant="outline"
+              size="sm"
+              onClick={handleToggleTheme}
+              className="gap-2"
             >
-              {showApiKey ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              {darkMode ? (
+                <Moon className="w-3.5 h-3.5" />
+              ) : (
+                <Sun className="w-3.5 h-3.5" />
+              )}
+              {darkMode ? "Dark" : "Light"}
             </Button>
           </div>
         </CardContent>
@@ -115,8 +93,12 @@ export default function Settings() {
                 {user?.full_name?.charAt(0) || "U"}
               </div>
               <div>
-                <p className="text-sm text-foreground">{user?.full_name || "User"}</p>
-                <p className="text-xs text-muted-foreground">{user?.email || ""}</p>
+                <p className="text-sm text-foreground">
+                  {user?.full_name || "User"}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  {user?.email || ""}
+                </p>
               </div>
             </div>
             <Badge className="text-[10px]">Owner</Badge>
@@ -136,7 +118,9 @@ export default function Settings() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-foreground">Current Plan</p>
-              <p className="text-xs text-muted-foreground">Full access to all features</p>
+              <p className="text-xs text-muted-foreground">
+                Full access to all features
+              </p>
             </div>
             <Badge className="bg-primary/10 text-primary border border-primary/30 text-[10px]">
               Pro
@@ -155,7 +139,9 @@ export default function Settings() {
         </CardHeader>
         <CardContent>
           <div className="flex items-center justify-between">
-            <p className="text-sm text-foreground">Generations this month</p>
+            <p className="text-sm text-foreground">
+              Generations this month
+            </p>
             <span className="text-lg font-display font-bold text-foreground">
               {generationsThisMonth}
             </span>
@@ -172,10 +158,16 @@ export default function Settings() {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-2">
-          <Button variant="ghost" className="w-full justify-start text-sm gap-2 h-9">
+          <Button
+            variant="ghost"
+            className="w-full justify-start text-sm gap-2 h-9"
+          >
             <ExternalLink className="w-3.5 h-3.5" /> Documentation
           </Button>
-          <Button variant="ghost" className="w-full justify-start text-sm gap-2 h-9">
+          <Button
+            variant="ghost"
+            className="w-full justify-start text-sm gap-2 h-9"
+          >
             <ExternalLink className="w-3.5 h-3.5" /> Support
           </Button>
           <Separator className="my-2" />
@@ -183,7 +175,9 @@ export default function Settings() {
             <span className="text-xs text-muted-foreground flex items-center gap-1.5">
               <Info className="w-3 h-3" /> Version
             </span>
-            <span className="text-xs text-muted-foreground font-mono">1.0.0</span>
+            <span className="text-xs text-muted-foreground font-mono">
+              1.0.0
+            </span>
           </div>
         </CardContent>
       </Card>
@@ -198,17 +192,24 @@ export default function Settings() {
         </CardHeader>
         <CardContent className="space-y-3">
           <p className="text-xs text-muted-foreground">
-            Sign out of your current company account and log in as a different company user.
+            Sign out of your current company account and log in as a different
+            company user.
           </p>
           <div className="flex items-center gap-3 p-3 rounded-lg bg-secondary/50 border border-border">
             <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-xs font-bold text-primary">
               U
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-foreground">Uden Tech</p>
-              <p className="text-xs text-muted-foreground">{user?.email || "current session"}</p>
+              <p className="text-sm font-medium text-foreground">
+                Uden Tech
+              </p>
+              <p className="text-xs text-muted-foreground">
+                {user?.email || "current session"}
+              </p>
             </div>
-            <Badge className="text-[10px] bg-green-500/10 text-green-400 border-green-500/20">Active</Badge>
+            <Badge className="text-[10px] bg-green-500/10 text-green-400 border-green-500/20">
+              Active
+            </Badge>
           </div>
           <Button
             variant="outline"
