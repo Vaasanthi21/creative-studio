@@ -17,6 +17,8 @@ export default function Generate() {
   const persona = getPersonaById(activePersona);
 
   const [variants, setVariants] = useState([]);
+  const [batchItems, setBatchItems] = useState([]);
+  const [isCancelled, setIsCancelled] = useState(false);
   const [expandedVariant, setExpandedVariant] = useState(null);
   const [exportVariant, setExportVariant] = useState(null);
 
@@ -70,12 +72,34 @@ Respond in JSON format:
         return result;
       }
 
-      // 🔥 BATCH MODE
+      // 🔥 BATCH MODE (UPDATED)
       if (params.mode === "batch") {
+        setIsCancelled(false);
+
+        const initialItems = params.topics.map((t) => ({
+          topic: t,
+          status: "pending",
+          variants: [],
+        }));
+
+        setBatchItems(initialItems);
+
         const allResults = [];
 
-        for (let topic of params.topics) {
-          const prompt = `You are a content creator for the "${persona.label}" brand (${persona.description}).
+        for (let i = 0; i < params.topics.length; i++) {
+          if (isCancelled) break;
+
+          const topic = params.topics[i];
+
+          // mark processing
+          setBatchItems((prev) =>
+            prev.map((item, idx) =>
+              idx === i ? { ...item, status: "processing" } : item
+            )
+          );
+
+          try {
+            const prompt = `You are a content creator for the "${persona.label}" brand (${persona.description}).
 
 Generate 3 distinct variants of a "${params.contentType}" about:
 "${topic}"
@@ -91,15 +115,41 @@ Respond in JSON format:
   ]
 }`;
 
-          const result = await generateContent({ prompt });
+            const result = await generateContent({ prompt });
+            
+            // mark completed
+            setBatchItems((prev) =>
+              prev.map((item, idx) =>
+                idx === i
+                  ? { ...item, status: "completed", variants: result }
+                  : item
+              )
+            );
 
-          // tag each variant with topic
-          const tagged = result.map((v) => ({
-            ...v,
-            topic,
-          }));
+            allResults.push(...result);
 
-          allResults.push(...tagged);
+            // ✅ SAVE EACH TOPIC TO HISTORY
+            await saveToHistory(
+              {
+                topic,
+                persona: activePersona,
+                persona_label: persona.label,
+                content_type: params.contentType,
+                tone: params.tone,
+                length: params.length,
+                keywords: params.keywords,
+                variants: result,
+                status: "completed",
+              },
+              supabase
+            );
+          } catch (err) {
+            setBatchItems((prev) =>
+              prev.map((item, idx) =>
+                idx === i ? { ...item, status: "failed" } : item
+              )
+            );
+          }
         }
 
         return allResults;
@@ -138,6 +188,27 @@ Respond in JSON format:
         onGenerate={(params) => generateMutation.mutate(params)}
         isGenerating={generateMutation.isPending}
       />
+
+      {/* 🔴 Cancel Button */}
+      {generateMutation.isPending && batchItems.length > 0 && (
+        <button
+          onClick={() => setIsCancelled(true)}
+          className="text-sm text-red-500 underline"
+        >
+          Cancel Batch
+        </button>
+      )}
+
+      {/* 🔵 Batch Progress */}
+      {batchItems.length > 0 && (
+        <div className="space-y-2">
+          {batchItems.map((item, idx) => (
+            <div key={idx} className="text-sm border p-2 rounded">
+              <strong>{item.topic}</strong> — {item.status}
+            </div>
+          ))}
+        </div>
+      )}
 
       {/* Loading */}
       {generateMutation.isPending && (
