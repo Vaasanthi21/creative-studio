@@ -23,17 +23,6 @@ const getAIConfig = () => {
     apiVersion: import.meta.env.VITE_AI_API_VERSION || '2024-02-15-preview',
   };
 
-  // Debug logging
-  console.log('=== AI Configuration Debug ===');
-  console.log('VITE_AI_PROVIDER:', import.meta.env.VITE_AI_PROVIDER);
-  console.log('VITE_AI_API_URL:', import.meta.env.VITE_AI_API_URL);
-  console.log('VITE_AI_MODEL:', import.meta.env.VITE_AI_MODEL);
-  console.log('API Key exists:', !!config.apiKey);
-  console.log('API Key length:', config.apiKey ? config.apiKey.length : 0);
-  console.log('Is Azure:', isAzure);
-  console.log('Full config:', config);
-  console.log('==============================');
-
   return config;
 };
 
@@ -51,13 +40,6 @@ export async function generateContent(params) {
       'AI API key not configured. Please add VITE_AI_API_KEY to your .env.local file.'
     );
   }
-
-  console.log('AI Config:', {
-    apiUrl: config.apiUrl,
-    model: config.model,
-    isAzure: config.isAzure,
-    hasApiKey: !!config.apiKey,
-  });
 
   try {
     // Build headers based on provider
