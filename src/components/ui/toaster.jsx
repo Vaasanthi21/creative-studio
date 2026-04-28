@@ -1,4 +1,5 @@
-import { useToast } from "@/components/ui/use-toast";
+"use client";
+
 import {
   Toast,
   ToastClose,
@@ -8,8 +9,10 @@ import {
   ToastViewport,
 } from "@/components/ui/toast";
 
+import { useToast } from "@/components/ui/use-toast";
+
 export function Toaster() {
-  const { toasts } = useToast();
+  const { toasts, dismiss } = useToast();
 
   return (
     <ToastProvider>
@@ -22,12 +25,13 @@ export function Toaster() {
                 <ToastDescription>{description}</ToastDescription>
               )}
             </div>
-            {action}
-            <ToastClose />
-          </Toast>
+
+            {/* ✅ FIXED CLOSE BUTTON */}
+            <ToastClose onClick={() => dismiss(id)} />
+            </Toast>
         );
       })}
       <ToastViewport />
     </ToastProvider>
   );
-} 
+}

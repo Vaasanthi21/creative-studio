@@ -92,10 +92,10 @@ Respond in JSON format:
                 idx >= i && item.status === "pending"
                   ? { ...item, status: "cancelled" }
                   : item
-            )
-          );
-          break;
-        }
+              )
+            );
+            break;
+          }
 
           const topic = params.topics[i];
 
@@ -166,7 +166,10 @@ Respond in JSON format:
 
     onSuccess: (data) => {
       setVariants(data);
-      toast({ title: "Content generated successfully!", duration: 2000 });
+      toast({
+         title: "Content generated successfully!",
+         duration: 3000 
+      });
     },
 
     onError: (error) => {
@@ -180,6 +183,7 @@ Respond in JSON format:
         title: "Generation failed",
         description: errorMessage,
         variant: "destructive",
+        duration: 4000,
       });
     },
   });
