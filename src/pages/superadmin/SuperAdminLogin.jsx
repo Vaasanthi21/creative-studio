@@ -24,7 +24,7 @@ export default function SuperAdminLogin() {
     if (form.email === VALID_EMAIL && form.password === VALID_PASSWORD) {
       // Store auth state
       localStorage.setItem("superadmin_auth", "true");
-      navigate("/superadmin/dashboard");
+      window.location.href = "/superadmin/dashboard";
     } else {
       setError("Invalid credentials. Use superadmin@creativestudio.com / admin123");
     }
@@ -102,7 +102,16 @@ export default function SuperAdminLogin() {
 
           <p className="text-center text-sm text-muted-foreground mt-6">
             Not a superadmin?{" "}
-            <Link to="/login" className="text-primary hover:underline font-medium">Back to regular login</Link>
+            <button
+              type="button"
+              onClick={() => {
+                localStorage.removeItem("superadmin_auth");
+                window.location.href = "/login";
+              }}
+              className="text-primary hover:underline font-medium"
+            >
+              Back to regular login
+            </button>
           </p>
         </div>
       </div>

@@ -26,8 +26,8 @@ import SuperAdminPlans from './pages/superadmin/SuperAdminPlans';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isAuthenticated, authError, navigateToLogin } = useAuth();
+  const isSuperAdmin = localStorage.getItem("superadmin_auth") === "true";
 
-  // Loading
   if (isLoadingAuth) {
     return (
       <div className="fixed inset-0 flex items-center justify-center">
@@ -36,32 +36,47 @@ const AuthenticatedApp = () => {
     );
   }
 
-  // Auth errors
   if (authError) {
     if (authError.type === 'user_not_registered') {
       return <UserNotRegisteredError />;
-    } else if (authError.type === 'auth_required') {
+    } else if (authError.type === 'auth_required' && !isSuperAdmin) {
       navigateToLogin();
       return null;
     }
   }
 
-  // ❗ NOT AUTHENTICATED → ONLY LOGIN + SUPERADMIN LOGIN
-  if (!isAuthenticated) {
+  if (!isAuthenticated && !isSuperAdmin) {
     return (
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
-
-        {/* ✅ allow superadmin login page */}
         <Route path="/superadmin/login" element={<SuperAdminLogin />} />
-
         <Route path="*" element={<Login />} />
       </Routes>
     );
   }
 
-  // ✅ AUTHENTICATED APP
+  if (isSuperAdmin) {
+    return (
+      <Routes>
+        <Route path="/superadmin/login" element={<SuperAdminLogin />} />
+
+        <Route element={<SuperAdminLayout />}>
+          <Route path="/superadmin/dashboard" element={<SuperAdminDashboard />} />
+          <Route path="/superadmin/analytics" element={<SuperAdminAnalytics />} />
+          <Route path="/superadmin/companies" element={<SuperAdminCompanies />} />
+          <Route path="/superadmin/users" element={<SuperAdminUsers />} />
+          <Route path="/superadmin/usage" element={<SuperAdminUsage />} />
+          <Route path="/superadmin/plans" element={<SuperAdminPlans />} />
+          <Route path="/superadmin/billing" element={<SuperAdminBilling />} />
+          <Route path="/superadmin/settings" element={<SuperAdminSettings />} />
+        </Route>
+
+        <Route path="*" element={<SuperAdminDashboard />} />
+      </Routes>
+    );
+  }
+
   return (
     <Routes>
       <Route path="/login" element={<Login />} />
@@ -75,7 +90,6 @@ const AuthenticatedApp = () => {
 
       <Route path="/register" element={<Register />} />
 
-      {/* Superadmin routes (protected by auth) */}
       <Route path="/superadmin/login" element={<SuperAdminLogin />} />
 
       <Route element={<SuperAdminLayout />}>
