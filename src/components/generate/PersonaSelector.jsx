@@ -1,70 +1,75 @@
 import React from "react";
-import { PERSONAS } from "@/lib/personas";
-import { GraduationCap, Youtube, Briefcase, Building2 } from "lucide-react";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { platforms } from "@/lib/personas";
+import { Linkedin, Instagram, Facebook, Youtube } from "lucide-react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 const iconMap = {
-  GraduationCap,
-  Youtube,
-  Briefcase,
-  Building2,
+  linkedin: Linkedin,
+  instagram: Instagram,
+  facebook: Facebook,
+  youtube: Youtube,
 };
 
-export default function PersonaSelector({ activePersona, onSelect }) {
+export default function PersonaSelector({ activePlatform, onSelect }) {
   return (
     <div className="bg-card border border-border rounded-lg p-5">
       <p className="text-[10px] font-semibold tracking-widest uppercase text-muted-foreground mb-3 flex items-center gap-1.5">
         <span className="w-3 h-px bg-muted-foreground inline-block" />
-        Select Persona
+        Select Platform
       </p>
+
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        {PERSONAS.map((persona) => {
-          const Icon = iconMap[persona.icon];
-          const isActive = activePersona === persona.id;
+        {platforms.map((platform) => {
+          const Icon = iconMap[platform.id];
+          const isActive = activePlatform === platform.id;
+
           return (
-            <TooltipProvider key={persona.id} delayDuration={200}>
+            <TooltipProvider key={platform.id} delayDuration={200}>
               <Tooltip>
                 <TooltipTrigger asChild>
                   <button
-                    onClick={() => onSelect(persona.id)}
+                    onClick={() => onSelect(platform.id)}
                     className={`flex flex-col gap-3 p-4 rounded-lg border text-left transition-all duration-150 ${
                       isActive
                         ? "border-primary bg-primary/5 scale-[1.02]"
-                        : "border-border bg-card hover:bg-muted hover:border-muted-foreground/30 hover:-translate-y-0.5"
+                        : "border-border bg-card hover:bg-muted/70 hover:border-primary/40 hover:-translate-y-1 hover:shadow-md"
                     }`}
                   >
                     <div
-                      className="w-9 h-9 rounded-md border flex items-center justify-center"
+                      className="w-10 h-10 rounded-md border flex items-center justify-center bg-primary/10"
                       style={{
-                        borderColor: persona.color,
-                        color: persona.color,
+                        borderColor: platform.color,
+                        color: platform.color,
                       }}
                     >
-                      {Icon && <Icon className="w-4 h-4" />}
+                      {Icon && <Icon className="w-5 h-5" />}
                     </div>
+
                     <div>
-                      <p className="text-xs font-display font-semibold text-foreground">
-                        {persona.label}
+                      <p className="text-sm font-semibold text-foreground">
+                        {platform.label}
                       </p>
                       <p className="text-[11px] text-secondary-foreground leading-snug mt-0.5">
-                        {persona.description}
+                        {platform.description}
                       </p>
-                    </div>
-                    <div className="flex gap-1">
-                      {persona.dots.map((dot, i) => (
-                        <span
-                          key={i}
-                          className="w-2 h-2 rounded-full"
-                          style={{ background: dot }}
-                        />
-                      ))}
                     </div>
                   </button>
                 </TooltipTrigger>
-                <TooltipContent side="bottom" className="max-w-xs">
-                  <p className="font-semibold text-xs mb-1">{persona.label}</p>
-                  <p className="text-[11px] text-muted-foreground">
-                    Content types: {persona.contentTypes.join(", ")}
+
+                <TooltipContent 
+                 side="bottom" 
+                 className="max-w-xs bg-primary text-primary-foreground border-none shadow-lg"
+                >
+                  <p className="font-semibold text-sm text-primary-foreground mb-1">
+                    {platform.label}
+                  </p>
+                  <p className="text-xs text-primary-foreground/90">
+                    {platform.description}
                   </p>
                 </TooltipContent>
               </Tooltip>

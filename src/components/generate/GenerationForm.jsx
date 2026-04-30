@@ -17,19 +17,14 @@ import { Sparkles, Loader2 } from "lucide-react";
 const MAX_BATCH_TOPICS = 10;
 
 export default function GenerationForm({ activePersona, onGenerate, isGenerating }) {
-  const persona = getPersonaById(activePersona);
-
+  
   const [mode, setMode] = useState("single");
   const [topic, setTopic] = useState("");
   const [batchTopics, setBatchTopics] = useState("");
-  const [contentType, setContentType] = useState(persona.contentTypes[0]);
   const [tone, setTone] = useState([50]);
   const [length, setLength] = useState([50]);
   const [keywords, setKeywords] = useState("");
-
-  useEffect(() => {
-    setContentType(persona.contentTypes[0]);
-  }, [activePersona, persona.contentTypes]);
+  const [contentType, setContentType] = useState("text");
 
   const batchLines = batchTopics
     .split("\n")
@@ -178,11 +173,11 @@ export default function GenerationForm({ activePersona, onGenerate, isGenerating
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              {persona.contentTypes.map((ct) => (
-                <SelectItem key={ct} value={ct}>
-                  {ct}
-                </SelectItem>
-              ))}
+              <SelectItem value="text">Text Only</SelectItem>
+              <SelectItem value="image">Image</SelectItem>
+              <SelectItem value="video">Video</SelectItem>
+              <SelectItem value="text-image">Text + Image</SelectItem>
+              <SelectItem value="text-video">Text + Video</SelectItem>
             </SelectContent>
           </Select>
         </div>
