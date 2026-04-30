@@ -15,23 +15,7 @@ export default function Login() {
   e.preventDefault();
   setIsLoading(true);
 
-  const SUPERADMIN_EMAIL = "superadmin@creativestudio.com";
-  const SUPERADMIN_PASSWORD = "admin123";
-
   try {
-    // 🔥 Check superadmin first
-    if (email === SUPERADMIN_EMAIL && password === SUPERADMIN_PASSWORD) {
-      localStorage.setItem("superadmin_auth", "true");
-
-      toast({
-        title: "Superadmin login successful!",
-        duration: 2000,
-      });
-
-      navigate("/superadmin/dashboard");
-      return;
-    }
-
     // 🔥 Normal user login
     await signIn(email, password);
 
