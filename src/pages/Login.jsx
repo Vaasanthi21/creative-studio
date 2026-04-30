@@ -12,23 +12,45 @@ export default function Login() {
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setIsLoading(true);
+  e.preventDefault();
+  setIsLoading(true);
 
-    try {
-      await signIn(email, password);
-      toast({ title: "Login successful!", duration: 2000 });
-      navigate("/");
-    } catch (error) {
-      toast({ 
-        title: "Login failed", 
-        description: error.message || "Invalid email or password", 
-        variant: "destructive" 
+  const SUPERADMIN_EMAIL = "superadmin@creativestudio.com";
+  const SUPERADMIN_PASSWORD = "admin123";
+
+  try {
+    // 🔥 Check superadmin first
+    if (email === SUPERADMIN_EMAIL && password === SUPERADMIN_PASSWORD) {
+      localStorage.setItem("superadmin_auth", "true");
+
+      toast({
+        title: "Superadmin login successful!",
+        duration: 2000,
       });
-    } finally {
-      setIsLoading(false);
+
+      navigate("/superadmin/dashboard");
+      return;
     }
-  };
+
+    // 🔥 Normal user login
+    await signIn(email, password);
+
+    toast({
+      title: "Login successful!",
+      duration: 2000,
+    });
+
+    navigate("/");
+  } catch (error) {
+    toast({
+      title: "Login failed",
+      description: error.message || "Invalid email or password",
+      variant: "destructive",
+    });
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   return (
     <div className="min-h-screen flex items-center justify-center p-6 bg-background">
@@ -111,12 +133,22 @@ export default function Login() {
               </button>
             </form>
 
-            <div className="text-center pt-2">
+            <div className="text-center pt-2 space-y-2">
               <p className="text-sm text-muted-foreground">
                 Don't have an account?{" "}
                 <Link to="/register" className="text-primary hover:underline font-medium">
                   Sign up
                 </Link>
+              </p>
+              
+              <p className="text-sm text-muted-foreground">
+                Super Admin?{" "}
+                  <Link
+                    to="/superadmin/login"
+                    className="text-primary hover:underline font-medium"
+                  >
+                    Login here
+                  </Link>
               </p>
             </div>
           </div>

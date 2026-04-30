@@ -4,7 +4,6 @@ import { generateContent, saveToHistory } from "@/services/aiService";
 import { supabase } from "@/api/supabaseClient";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "@/components/ui/use-toast";
-import { getPersonaById } from "@/lib/personas";
 import PersonaSelector from "@/components/generate/PersonaSelector";
 import GenerationForm from "@/components/generate/GenerationForm";
 import VariantCard from "@/components/generate/VariantCard";
@@ -12,9 +11,29 @@ import VariantExpandedModal from "@/components/generate/VariantExpandedModal";
 import ExportDialog from "@/components/dialogs/ExportDialog";
 import { Loader2 } from "lucide-react";
 
+const PLATFORM_DETAILS = {
+  linkedin: {
+    label: "LinkedIn",
+    description: "professional, business-focused audience",
+  },
+  instagram: {
+    label: "Instagram",
+    description: "visual-first, engaging social audience",
+  },
+  facebook: {
+    label: "Facebook",
+    description: "community-focused and conversational audience",
+  },
+  youtube: {
+    label: "YouTube",
+    description: "video-focused audience with engaging titles and descriptions",
+  },
+};
+
 export default function Generate() {
   const { activePersona, setActivePersona } = useOutletContext();
-  const persona = getPersonaById(activePersona);
+  const platform =
+  PLATFORM_DETAILS[activePersona] || PLATFORM_DETAILS.linkedin;
 
   const [variants, setVariants] = useState([]);
   const [batchItems, setBatchItems] = useState([]);
@@ -36,9 +55,13 @@ export default function Generate() {
 
       // 🔥 SINGLE MODE
       if (params.mode === "single") {
-        const prompt = `You are a content creator for the "${persona.label}" brand (${persona.description}).
+        const prompt = `You are a social media content creator.
+        
+        Platform: ${platform.label}
+        Audience style: ${platform.description}
+        Content format: ${params.contentType}
 
-Generate 3 distinct variants of a "${params.contentType}" about:
+Generate 3 distinct variants about:
 "${params.topic}"
 
 Tone: ${toneLabel}
@@ -58,7 +81,7 @@ Respond in JSON format:
           {
             topic: params.topic,
             persona: activePersona,
-            persona_label: persona.label,
+            persona_label: platform.label,
             content_type: params.contentType,
             tone: params.tone,
             length: params.length,
@@ -107,9 +130,13 @@ Respond in JSON format:
           );
 
           try {
-            const prompt = `You are a content creator for the "${persona.label}" brand (${persona.description}).
+            const prompt = `You are a social media content creator.
+            
+            Platform: ${platform.label}
+            Audience style: ${platform.description}
+            Content format: ${params.contentType}
 
-Generate 3 distinct variants of a "${params.contentType}" about:
+Generate 3 distinct variants about:
 "${topic}"
 
 Tone: ${toneLabel}
@@ -141,7 +168,7 @@ Respond in JSON format:
               {
                 topic,
                 persona: activePersona,
-                persona_label: persona.label,
+                persona_label: platform.label,
                 content_type: params.contentType,
                 tone: params.tone,
                 length: params.length,
@@ -191,7 +218,7 @@ Respond in JSON format:
   return (
     <div className="p-4 md:p-6 space-y-5 max-w-5xl mx-auto">
       <PersonaSelector
-        activePersona={activePersona}
+        activePlatform={activePersona}
         onSelect={setActivePersona}
       />
 
