@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Building2, Plus, Search, MoreHorizontal, Users, Ban, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -24,7 +24,8 @@ const statusStyles = {
 };
 
 export default function SuperAdminCompanies() {
-  const [companies, setCompanies] = useState(INITIAL_COMPANIES);
+  const [companies, setCompanies] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [open, setOpen] = useState(false);
   const [toast, setToast] = useState("");
@@ -36,31 +37,70 @@ export default function SuperAdminCompanies() {
     status: "active",
   });
 
+  useEffect(() => {
+    async function fetchCompanies() {
+      try {
+        const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:4000";
+        const response = await fetch(`${apiUrl}/api/companies`);
+        const data = await response.json();
+
+        setCompanies(data);
+      } catch (error) {
+        console.error("Failed to fetch companies:", error);
+        setCompanies(INITIAL_COMPANIES);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchCompanies();
+  }, []);
+
   const filtered = companies.filter(
     (c) =>
       c.name.toLowerCase().includes(search.toLowerCase()) ||
       c.email.toLowerCase().includes(search.toLowerCase())
   );
 
-  function handleAddCompany(e) {
+  async function handleAddCompany(e) {
     e.preventDefault();
 
-    const newCompany = {
-      id: Date.now(),
-      name: form.name,
-      email: form.email,
-      users: 0,
-      plan: form.plan,
-      status: form.status,
-      joined: "Now",
-    };
+    try {
+      const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:4000";
 
-    setCompanies([newCompany, ...companies]);
-    setForm({ name: "", email: "", plan: "Starter", status: "active" });
-    setOpen(false);
+      const response = await fetch(`${apiUrl}/api/companies`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: form.name,
+          email: form.email,
+          plan: form.plan,
+          status: form.status,
+        }),
+      });
 
-    setToast("Company added successfully");
-    setTimeout(() => setToast(""), 2500);
+      const data = await response.json();
+
+      console.log("Add company response:", data);
+
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to add company");
+      }
+
+      setCompanies((prev) => [data, ...prev]);
+
+      setForm({ name: "", email: "", plan: "Starter", status: "active" });
+      setOpen(false);
+
+      setToast("Company added successfully");
+      setTimeout(() => setToast(""), 2500);
+    } catch (error) {
+      console.error("Add company error:", error);
+      setToast("Failed to add company");
+      setTimeout(() => setToast(""), 2500);
+    }
   }
 
   return (
@@ -107,7 +147,13 @@ export default function SuperAdminCompanies() {
             </thead>
 
             <tbody className="divide-y divide-border">
-              {filtered.length === 0 ? (
+              {loading ? (
+                <tr>
+                  <td colSpan={6} className="px-5 py-8 text-center text-sm text-muted-foreground">
+                    Loading companies...
+                  </td>
+                </tr>
+              ) : filtered.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="px-5 py-8 text-center text-sm text-muted-foreground">
                     No companies found
@@ -115,7 +161,7 @@ export default function SuperAdminCompanies() {
                 </tr>
               ) : (
                 filtered.map((c) => (
-                  <tr key={c.id} className="hover:bg-secondary/20 transition-colors">
+                  <tr key={c.id || c._id} className="hover:bg-secondary/20 transition-colors">
                     <td className="px-5 py-3.5">
                       <div className="flex items-center gap-3">
                         <div className="w-8 h-8 rounded-lg bg-secondary flex items-center justify-center text-xs font-bold text-foreground">
@@ -177,13 +223,17 @@ export default function SuperAdminCompanies() {
       </div>
 
       <div className="md:hidden space-y-3">
-        {filtered.length === 0 ? (
+        {loading ? (
+          <div className="bg-card border border-border rounded-xl p-6 text-center text-sm text-muted-foreground">
+            Loading companies...
+          </div>
+        ) : filtered.length === 0 ? (
           <div className="bg-card border border-border rounded-xl p-6 text-center text-sm text-muted-foreground">
             No companies found
           </div>
         ) : (
           filtered.map((c) => (
-            <div key={c.id} className="bg-card border border-border rounded-xl p-4 space-y-3">
+            <div key={c.id || c._id} className="bg-card border border-border rounded-xl p-4 space-y-3">
               <div className="flex items-start justify-between gap-3">
                 <div className="flex items-center gap-3 min-w-0">
                   <div className="w-9 h-9 rounded-lg bg-secondary flex items-center justify-center text-xs font-bold text-foreground">
